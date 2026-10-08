@@ -35,7 +35,7 @@ export function LiveCallScreen({
   const [callDuration, setCallDuration] = useState(0);
   const [isMuted, setIsMuted] = useState(false);
   const [isSpeaker, setIsSpeaker] = useState(false);
-  const [isRecording, setIsRecording] = useState(true);
+  const [isRecording, setIsRecording] = useState(false);
 
   // Transcript lines
   const [transcript, setTranscript] = useState([]);
@@ -48,6 +48,23 @@ export function LiveCallScreen({
   const [counterAdvisory, setCounterAdvisory] = useState('');
 
   const scrollViewRef = useRef(null);
+
+  // Ask for recording permission on mount
+  useEffect(() => {
+    Alert.alert(
+      "Call Recording Permission",
+      "Do you want to allow SafeShield to record and analyze this call for fraud detection?",
+      [
+        {
+          text: "Decline",
+          onPress: () => setIsRecording(false),
+          style: "cancel"
+        },
+        { text: "Allow", onPress: () => setIsRecording(true) }
+      ],
+      { cancelable: false }
+    );
+  }, []);
 
   // Timer
   useEffect(() => {
@@ -85,6 +102,24 @@ export function LiveCallScreen({
       return () => clearTimeout(timeout);
     }
   }, [scenario, dialogueIndex, customScript]);
+
+  // Auto-disconnect if scam is detected
+  useEffect(() => {
+    if (riskLevel === 'CRITICAL') {
+      const timer = setTimeout(() => {
+        handleHangUp();
+        Alert.alert(
+          "🚨 Scam Detected!",
+          "This call was identified as a severe scam attempt and has been disconnected automatically for your safety.",
+          [
+            { text: "OK", style: "default" }
+          ],
+          { cancelable: true }
+        );
+      }, 500);
+      return () => clearTimeout(timer);
+    }
+  }, [riskLevel]);
 
   const appendSpeech = (speaker, text) => {
     setTranscript(prev => [...prev, { speaker, text, timestamp: new Date().toLocaleTimeString() }]);
