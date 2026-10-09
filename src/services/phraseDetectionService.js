@@ -144,10 +144,39 @@ export const PHRASE_PATTERNS = [
     weight: 32,
     explanation: 'Scammers use fake police badges, uniforms, and backdrops on Skype/WhatsApp to stage realistic-looking fake police stations.',
     counterAdvisory: 'Courts and police do not conduct investigations on WhatsApp or Skype video calls.'
+  },
+
+  // 8. Utility & Electricity Emergency Blackmail
+  {
+    regex: /\b(power (?:will be )?disconnected|electricity (?:bill|power|connection)|dear consumer|power cut at 9:30|disconnection notice|electricity officer|pay your electricity bill)\b/gi,
+    category: 'utility_disconnection',
+    categoryLabel: 'Electricity Disconnection Emergency',
+    severity: 'HIGH',
+    weight: 35,
+    explanation: 'Fake disconnection warnings designed to induce urgent compliance before official channels can verify.',
+    counterAdvisory: 'Power distribution companies do not disconnect supply via phone call. Verify directly on state discom portal.'
+  },
+
+  // 9. SIM & Telecom Deactivation Threats
+  {
+    regex: /\b(sim card (?:will be )?blocked|telecom verification|trai notice|dot verification|sim deactivation|kyc update for sim)\b/gi,
+    category: 'telecom_kyc',
+    categoryLabel: 'SIM Card Deactivation Threat',
+    severity: 'HIGH',
+    weight: 35,
+    explanation: 'Threatening immediate SIM deactivation within 24 hours unless urgent KYC is performed on call or via an external link.',
+    counterAdvisory: 'TRAI and telecom operators do not call individual citizens threatening sudden deactivation. Visit an official operator store.'
   }
 ];
 
 export const PhraseDetectionService = {
+  /**
+   * Scans a text string and returns full phrase analysis, tokens and stats
+   */
+  scanText(text = '') {
+    return this.analyzeStreamText(text);
+  },
+
   /**
    * Scans a transcript string or streaming text chunk in real-time,
    * extracting all detected manipulative/fraudulent phrases and tokenizing the text for highlight rendering.
@@ -318,6 +347,42 @@ export const PhraseDetectionService = {
           highlightBg: 'bg-yellow-950/70 text-yellow-100 border border-yellow-500/50',
           indicatorColor: 'text-yellow-400',
           glowRing: 'ring-1 ring-yellow-500/40'
+        };
+    }
+  },
+
+  /**
+   * Native React Native styling tokens for badges and highlights
+   */
+  getSeverityStyle(severity) {
+    switch (severity) {
+      case 'CRITICAL':
+        return {
+          badgeBg: 'rgba(244, 63, 94, 0.22)',
+          badgeText: '#fda4af',
+          badgeBorder: '#f43f5e',
+          highlightBg: 'rgba(244, 63, 94, 0.25)',
+          highlightText: '#ffe4e6',
+          dotColor: '#f43f5e'
+        };
+      case 'HIGH':
+        return {
+          badgeBg: 'rgba(245, 158, 11, 0.22)',
+          badgeText: '#fde68a',
+          badgeBorder: '#f59e0b',
+          highlightBg: 'rgba(245, 158, 11, 0.25)',
+          highlightText: '#fef3c7',
+          dotColor: '#f59e0b'
+        };
+      case 'MEDIUM':
+      default:
+        return {
+          badgeBg: 'rgba(234, 179, 8, 0.18)',
+          badgeText: '#fef08a',
+          badgeBorder: '#eab308',
+          highlightBg: 'rgba(234, 179, 8, 0.22)',
+          highlightText: '#fef9c3',
+          dotColor: '#eab308'
         };
     }
   },

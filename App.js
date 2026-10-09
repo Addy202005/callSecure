@@ -1,37 +1,86 @@
-import React, { useState, useEffect } from 'react';
-import { View, StyleSheet, StatusBar, SafeAreaView, TouchableOpacity, Text } from 'react-native';
-import { Users, Phone, ShieldCheck, ShieldAlert, FileText, Lock } from 'lucide-react-native';
+import React, { useState, useEffect, Component } from 'react';
+import { View, StyleSheet, StatusBar, TouchableOpacity, Text } from 'react-native';
+import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
+import { Users, Phone, ShieldCheck, ShieldAlert, FileText, Lock, AlertTriangle, RefreshCw } from 'lucide-react-native';
 
 import { ContactsScreen } from './src/screens/ContactsScreen';
 import { DialpadScreen } from './src/screens/DialpadScreen';
 import { LiveCallScreen } from './src/screens/LiveCallScreen';
 import { SecureVaultScreen } from './src/screens/SecureVaultScreen';
 import { CyberReportingScreen } from './src/screens/CyberReportingScreen';
+import { CallConsentModal } from './src/components/CallConsentModal';
 import { StorageService } from './src/services/storageService';
 
-export default function App() {
+class ErrorBoundary extends Component {
+  constructor(props) {
+    super(props);
+    this.state = { hasError: false, error: null };
+  }
+
+  static getDerivedStateFromError(error) {
+    return { hasError: true, error };
+  }
+
+  componentDidCatch(error, errorInfo) {
+    console.warn('App error caught by ErrorBoundary:', error, errorInfo);
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return (
+        <SafeAreaView style={styles.errorContainer}>
+          <StatusBar barStyle="light-content" backgroundColor="#020617" />
+          <AlertTriangle size={48} color="#f43f5e" />
+          <Text style={styles.errorTitle}>SafeShield encountered an issue</Text>
+          <Text style={styles.errorSubtitle}>
+            {this.state.error?.message || 'An unexpected error occurred.'}
+          </Text>
+          <TouchableOpacity
+            style={styles.retryButton}
+            onPress={() => this.setState({ hasError: false, error: null })}
+          >
+            <RefreshCw size={18} color="#ffffff" />
+            <Text style={styles.retryButtonText}>Restart SafeShield</Text>
+          </TouchableOpacity>
+        </SafeAreaView>
+      );
+    }
+    return this.props.children;
+  }
+}
+
+function MainApp() {
   const [activeTab, setActiveTab] = useState('contacts'); // 'contacts' | 'dialpad' | 'vault' | 'reporting'
   const [isReady, setIsReady] = useState(false);
 
   // Active Call State
   const [activeCall, setActiveCall] = useState(null);
 
+  // Pre-Call Consent State (Every call requires explicit user consent)
+  const [pendingCall, setPendingCall] = useState(null);
+
   // Handoff to Cyber Reporting
   const [reportingRecording, setReportingRecording] = useState(null);
 
   useEffect(() => {
     async function prepare() {
-      await StorageService.init();
-      setIsReady(true);
+      try {
+        await StorageService.init();
+      } catch (err) {
+        console.warn('StorageService init failed, continuing:', err);
+      } finally {
+        setIsReady(true);
+      }
     }
     prepare();
   }, []);
 
-  // Call Handlers
+  // Call Handlers - Open Consent Verification Prompt Every Time
   const handleStartCallFromContact = (contact) => {
-    setActiveCall({
+    setPendingCall({
       callerName: contact.name,
       phoneNumber: contact.phone,
+      callType: contact.category === 'suspicious' ? 'Suspect Flagged Contact' : 'Direct Contact Call',
       scenario: undefined,
       customScript: contact.category === 'suspicious'
         ? 'This is Inspector Chauhan from Cyber Police. You are under Digital Arrest for money laundering.'
@@ -40,21 +89,48 @@ export default function App() {
   };
 
   const handleStartCustomCall = (callerName, phoneNumber, script) => {
-    setActiveCall({
+    setPendingCall({
       callerName,
       phoneNumber,
+      callType: 'Direct Dial Line',
       scenario: undefined,
       customScript: script
     });
   };
 
   const handleStartScenarioCall = (scenario) => {
-    setActiveCall({
+    setPendingCall({
       callerName: scenario.callerName,
       phoneNumber: scenario.callerPhone,
+      callType: `Simulation: ${scenario.title}`,
       scenario: scenario,
       customScript: undefined
     });
+  };
+
+  // Statutory Consent Callbacks
+  const handleConsentGranted = () => {
+    if (!pendingCall) return;
+    setActiveCall({
+      ...pendingCall,
+      consentGranted: true,
+      consentTimestamp: new Date().toISOString()
+    });
+    setPendingCall(null);
+  };
+
+  const handleConsentDeclined = () => {
+    if (!pendingCall) return;
+    setActiveCall({
+      ...pendingCall,
+      consentGranted: false,
+      consentTimestamp: null
+    });
+    setPendingCall(null);
+  };
+
+  const handleCancelPendingCall = () => {
+    setPendingCall(null);
   };
 
   const handleEndCall = (recording) => {
@@ -85,6 +161,8 @@ export default function App() {
         phoneNumber={activeCall.phoneNumber}
         scenario={activeCall.scenario}
         customScript={activeCall.customScript}
+        consentGranted={activeCall.consentGranted}
+        consentTimestamp={activeCall.consentTimestamp}
         onEndCall={handleEndCall}
       />
     );
@@ -161,6 +239,17 @@ export default function App() {
           </Text>
         </TouchableOpacity>
       </View>
+
+      {/* Statutory Call Recording & Real-Time AI Consent Prompt (Every Call Made) */}
+      <CallConsentModal
+        visible={!!pendingCall}
+        callerName={pendingCall?.callerName}
+        phoneNumber={pendingCall?.phoneNumber}
+        callType={pendingCall?.callType}
+        onConsentGranted={handleConsentGranted}
+        onConsentDeclined={handleConsentDeclined}
+        onCancel={handleCancelPendingCall}
+      />
     </SafeAreaView>
   );
 }
@@ -213,5 +302,50 @@ const styles = StyleSheet.create({
   tabLabelActive: {
     color: '#818cf8',
     fontWeight: '700'
+  },
+  errorContainer: {
+    flex: 1,
+    backgroundColor: '#020617',
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 24,
+    gap: 12
+  },
+  errorTitle: {
+    color: '#ffffff',
+    fontSize: 18,
+    fontWeight: '800',
+    marginTop: 8
+  },
+  errorSubtitle: {
+    color: '#94a3b8',
+    fontSize: 13,
+    textAlign: 'center',
+    marginBottom: 16
+  },
+  retryButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#3b82f6',
+    paddingHorizontal: 20,
+    paddingVertical: 12,
+    borderRadius: 12,
+    gap: 8
+  },
+  retryButtonText: {
+    color: '#ffffff',
+    fontSize: 14,
+    fontWeight: '700'
   }
 });
+
+export default function App() {
+  return (
+    <SafeAreaProvider>
+      <ErrorBoundary>
+        <MainApp />
+      </ErrorBoundary>
+    </SafeAreaProvider>
+  );
+}
+

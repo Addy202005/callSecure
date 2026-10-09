@@ -8,11 +8,19 @@ export const ApiService = {
     API_BASE_URL = url;
   },
 
+  getBaseUrl() {
+    return API_BASE_URL;
+  },
+
   /**
-   * Analyzes live call transcript with server-side AI, with resilient local on-device heuristic fallback
+   * Analyzes live call transcript with server-side AI (BERT / Heuristic Server),
+   * with resilient on-device heuristic fallback.
    */
   async analyzeTranscript(transcript, callerPhone, callerName, currentStep) {
     try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 2500);
+
       const response = await fetch(`${API_BASE_URL}/api/call/analyze`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -21,14 +29,22 @@ export const ApiService = {
           callerPhone,
           callerName,
           currentStep
-        })
+        }),
+        signal: controller.signal
       });
 
+      clearTimeout(timeoutId);
+
       if (response.ok) {
-        return await response.json();
+        const data = await response.json();
+        return {
+          ...data,
+          source: 'SERVER_AI_BERT'
+        };
       }
     } catch (e) {
-      console.log('Using on-device fraud analysis engine fallback:', e.message);
+      // Graceful on-device fallback
+      // console.log('Using on-device fraud analysis engine fallback:', e.message);
     }
 
     // Local On-Device Fallback using PhraseDetectionService
@@ -48,6 +64,8 @@ export const ApiService = {
       riskLevel,
       scamType: detectedThreats[0] || (riskLevel === 'SAFE' ? 'Normal / Non-Threatening' : 'Suspicious Telephony Activity'),
       threatIndicators: detectedThreats,
+      flaggedTokens: phraseAnalysis.flaggedPhrases,
+      tokenizedSegments: phraseAnalysis.tokenizedSegments,
       reasoning: phraseAnalysis.flaggedPhrases.length > 0
         ? `Detected coercive triggers: ${detectedThreats.join(', ')}.`
         : 'Conversation flow appears typical with no high-risk extortion cues.',
@@ -55,16 +73,64 @@ export const ApiService = {
         ? 'IMMEDIATELY DISCONNECT. Genuine law enforcement or banks never conduct legal actions or request OTPs over video/voice calls.'
         : riskLevel === 'HIGH'
         ? 'Exercise extreme caution. Do not share OTPs, bank numbers, or agree to video call isolation.'
-        : 'Standard call safety practices apply.'
+        : 'Standard call safety practices apply.',
+      source: 'ON_DEVICE_FALLBACK'
+    };
+  },
+
+  /**
+   * Real-time stream chunk / token analysis
+   */
+  async streamChunk(text) {
+    try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 1500);
+
+      const response = await fetch(`${API_BASE_URL}/api/call/stream`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text }),
+        signal: controller.signal
+      });
+
+      clearTimeout(timeoutId);
+
+      if (response.ok) {
+        return await response.json();
+      }
+    } catch {
+      // Fallback to local on-device
+    }
+
+    const localScan = PhraseDetectionService.scanText(text);
+    return {
+      riskScore: localScan.stats.riskScore,
+      riskLevel: localScan.stats.highestSeverity,
+      flaggedTokens: localScan.flaggedPhrases,
+      threatIndicators: localScan.flaggedPhrases.map(p => p.categoryLabel)
     };
   },
 
   async checkHealth() {
     try {
-      const response = await fetch(`${API_BASE_URL}/api/health`);
-      return await response.json();
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 2000);
+
+      const response = await fetch(`${API_BASE_URL}/api/health`, {
+        signal: controller.signal
+      });
+      clearTimeout(timeoutId);
+
+      if (response.ok) {
+        const data = await response.json();
+        return {
+          ...data,
+          connected: true
+        };
+      }
     } catch {
-      return { status: 'offline', onDeviceAI: true };
+      // Server not running or offline
     }
+    return { status: 'offline', connected: false, onDeviceAI: true };
   }
 };

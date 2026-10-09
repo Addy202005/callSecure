@@ -1,12 +1,39 @@
 import React from 'react';
-import { TouchableOpacity, Text, View, StyleSheet } from 'react-native';
+import { TouchableOpacity, Text, View, StyleSheet, Platform } from 'react-native';
+import * as Haptics from 'expo-haptics';
 
-export function DialpadKey({ digit, letters, onPress }) {
+export function DialpadKey({ digit, letters, onPress, onLongPress }) {
+  const handlePress = () => {
+    try {
+      if (Platform.OS !== 'web') {
+        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+      }
+    } catch {
+      // safe fallback
+    }
+    onPress(digit);
+  };
+
+  const handleLongPress = () => {
+    try {
+      if (Platform.OS !== 'web') {
+        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+      }
+    } catch {
+      // safe fallback
+    }
+    if (onLongPress) {
+      onLongPress(digit);
+    }
+  };
+
   return (
     <TouchableOpacity
       style={styles.keyButton}
-      activeOpacity={0.6}
-      onPress={() => onPress(digit)}
+      activeOpacity={0.4}
+      onPress={handlePress}
+      onLongPress={handleLongPress}
+      delayLongPress={450}
     >
       <Text style={styles.digitText}>{digit}</Text>
       {letters ? <Text style={styles.lettersText}>{letters}</Text> : <View style={styles.emptySpacer} />}
@@ -24,16 +51,16 @@ const styles = StyleSheet.create({
     borderColor: '#334155',
     alignItems: 'center',
     justifyContent: 'center',
-    margin: 8,
+    margin: 7,
     shadowColor: '#000000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
-    shadowRadius: 3,
-    elevation: 2
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 3
   },
   digitText: {
     color: '#f8fafc',
-    fontSize: 26,
+    fontSize: 27,
     fontWeight: '600'
   },
   lettersText: {
@@ -47,3 +74,4 @@ const styles = StyleSheet.create({
     height: 10
   }
 });
+

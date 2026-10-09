@@ -1,4 +1,4 @@
-# Secure call Mobile - React Native Fraud Call Defense (JavaScript)
+# callSecure Mobile - React Native Fraud Call Defense (JavaScript)
 
 A full-featured **React Native application** written in **JavaScript** for iOS and Android smartphones, providing real-time AI scam detection, live speech streaming, biometric evidence vault, and automated Cybercrime Portal (1930) reporting.
 
@@ -10,7 +10,7 @@ A full-featured **React Native application** written in **JavaScript** for iOS a
    - Modern mobile contact manager with search bar (name, phone, company).
    - Fast filtering for **Favorites**, **Blocked**, **Suspicious/Fraud**, and **Emergency**.
    - Ordered by most frequently used (`callCount`) in Favorites and Blocked.
-   - Contact cards with verified badges, 3-dot context menu, one-tap SafeShield call.
+   - Contact cards with verified badges, 3-dot context menu, one-tap callSecure call.
    - Simplified Add Contact modal with streamlined required fields.
 
 2. **Dialer Screen (`src/screens/DialpadScreen.js`)**:

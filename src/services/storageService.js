@@ -8,12 +8,18 @@ const REPORTS_KEY = '@safeshield_reports_v1';
 const SETTINGS_KEY = '@safeshield_settings_v1';
 const VAULT_PIN_KEY = '@safeshield_vault_pin_v1';
 const BLOCKED_NUMBERS_KEY = '@safeshield_blocked_numbers_v1';
+const RECENT_DIALS_KEY = '@safeshield_recent_dials_v1';
 
 const DEFAULT_VAULT_PIN = '1930';
 
 let cachedContacts = [...INITIAL_CONTACTS];
 let cachedRecordings = [...INITIAL_RECORDINGS];
 let cachedBlockedNumbers = ['+91 98201 54321', '+91 80000 12345'];
+let cachedRecentDials = [
+  { id: 'rd-1', name: 'Aarav Sharma', phone: '+91 98765 43210', timestamp: 'Today, 10:30 AM', type: 'outgoing' },
+  { id: 'rd-2', name: 'Cyber Police Extortion (Suspect)', phone: '+91 91100 99999', timestamp: 'Yesterday', type: 'blocked' },
+  { id: 'rd-3', name: 'Priya Patel (SBI Manager)', phone: '+91 98111 22334', timestamp: '2 days ago', type: 'outgoing' }
+];
 let isInitialized = false;
 
 export const StorageService = {
@@ -37,6 +43,11 @@ export const StorageService = {
       const blockedStr = await AsyncStorage.getItem(BLOCKED_NUMBERS_KEY);
       if (blockedStr) {
         cachedBlockedNumbers = JSON.parse(blockedStr);
+      }
+
+      const recentStr = await AsyncStorage.getItem(RECENT_DIALS_KEY);
+      if (recentStr) {
+        cachedRecentDials = JSON.parse(recentStr);
       }
     } catch (e) {
       console.warn('StorageService.init error:', e);
@@ -152,5 +163,28 @@ export const StorageService = {
   async verifyVaultPin(enteredPin) {
     const pin = await this.getVaultPin();
     return enteredPin === pin;
+  },
+
+  getRecentDials() {
+    return cachedRecentDials;
+  },
+
+  async addRecentDial(dial) {
+    const newEntry = {
+      id: 'rd-' + Date.now(),
+      name: dial.name || 'Direct Dial',
+      phone: dial.phone,
+      timestamp: 'Just now',
+      type: dial.type || 'outgoing'
+    };
+    // keep unique or top 20
+    const filtered = cachedRecentDials.filter(d => d.phone.replace(/\D/g, '') !== dial.phone.replace(/\D/g, ''));
+    cachedRecentDials = [newEntry, ...filtered].slice(0, 20);
+    try {
+      await AsyncStorage.setItem(RECENT_DIALS_KEY, JSON.stringify(cachedRecentDials));
+    } catch (e) {
+      console.error('Failed to save recent dial', e);
+    }
+    return cachedRecentDials;
   }
 };

@@ -6,9 +6,9 @@ import {
   FlatList,
   Modal,
   StyleSheet,
-  SafeAreaView,
   Alert
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import {
   Lock,
   Unlock,

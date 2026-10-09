@@ -1,25 +1,28 @@
 {
   "expo": {
-    "name": "SafeShield Call Guard",
+    "name": "callSecure",
     "slug": "safeshield-call-guard",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "dark",
     "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "contain",
       "backgroundColor": "#020617"
     },
     "ios": {
       "supportsTablet": false,
       "infoPlist": {
-        "NSMicrophoneUsageDescription": "SafeShield requires microphone access to detect fraud cues and transcribe speech in real-time."
+        "NSMicrophoneUsageDescription": "callSecure requires microphone access to detect fraud cues and transcribe speech in real-time."
       }
     },
     "android": {
       "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#020617"
       },
-      "package": "com.safeshield.frauddefense",
+      "package": "com.callsecure",
       "permissions": [
         "android.permission.RECORD_AUDIO",
         "android.permission.MODIFY_AUDIO_SETTINGS"
@@ -29,7 +32,18 @@
       "favicon": "./assets/favicon.png"
     },
     "plugins": [
-      "expo-status-bar"
-    ]
+      "expo-status-bar",
+      [
+        "expo-audio",
+        {
+          "microphonePermission": "callSecure requires microphone access to detect fraud cues and transcribe speech in real-time."
+        }
+      ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "d6a78d9d-4df5-4d3f-ba33-872eb07f5985"
+      }
+    }
   }
 }
