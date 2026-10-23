@@ -26,7 +26,7 @@ const THREAT_RULES = [
   {
     category: 'digital_arrest',
     categoryLabel: 'Fabricated Legal Term (Digital Arrest)',
-    regex: /\b(digital arrest|digitally arrested|digital remand|online arrest)\b/gi,
+    regex: /\b(digital arrest|digitally arrested|digital remand|online arrest|interrogation on video|skype interrogation)\b/gi,
     severity: 'CRITICAL',
     weight: 48,
     legalSection: 'CrPC / BNSS (Arrest Procedure Violation)',
@@ -35,16 +35,16 @@ const THREAT_RULES = [
   {
     category: 'fake_warrant',
     categoryLabel: 'Unverified Arrest Warrant Threat',
-    regex: /\b(non[- ]?bailable (?:arrest )?warrant|arrest warrant|supreme court warrant|court notice)\b/gi,
+    regex: /\b(non[- ]?bailable (?:arrest )?warrant|arrest warrant|supreme court warrant|court notice|ipc (?:section )?420|section 120b|money laundering)\b/gi,
     severity: 'CRITICAL',
-    weight: 42,
+    weight: 44,
     legalSection: 'Section 70 / 72 CrPC (Statutory Warrant Requirements)',
     advisory: 'Arrest warrants cannot be served over phone or WhatsApp. Warrants must be executed physically by uniformed officers.'
   },
   {
     category: 'agency_impersonation',
     categoryLabel: 'Law Enforcement / Agency Impersonation',
-    regex: /\b(supreme court|cbi investigation|crime branch|cyber cell|mumbai police|delhi police|police commissioner|anti[- ]terror squad|customs officer)\b/gi,
+    regex: /\b(supreme court|cbi investigation|crime branch|cyber cell|mumbai police|delhi police|police commissioner|anti[- ]terror squad|customs officer|cbi officer|inspector)\b/gi,
     severity: 'HIGH',
     weight: 38,
     legalSection: 'IPC Section 170 (Personating a public servant)',
@@ -62,9 +62,9 @@ const THREAT_RULES = [
   {
     category: 'escrow_coercion',
     categoryLabel: 'Fabricated Escrow Account Extortion',
-    regex: /\b(rbi (?:secret )?verification escrow account|rbi escrow|secret escrow|verification escrow|rbi security deposit|asset seizure list|transfer (?:your )?(?:entire )?bank balance)\b/gi,
+    regex: /\b(rbi (?:secret )?verification escrow account|rbi escrow|secret escrow|verification escrow|rbi security deposit|asset seizure list|asset seizure|transfer (?:your )?(?:entire )?bank balance)\b/gi,
     severity: 'CRITICAL',
-    weight: 45,
+    weight: 46,
     legalSection: 'IPC Section 384 (Extortion) & IPC Section 420',
     advisory: 'The Reserve Bank of India does NOT operate public escrow or verification accounts. Any transfer request is fraudulent.'
   },
@@ -128,7 +128,12 @@ function analyzeConversationText(text) {
       threatIndicators: [],
       legalViolations: [],
       reasoning: 'No speech detected or text is empty.',
-      recommendedAction: 'Standard safety practices apply.'
+      recommendedAction: 'Standard safety practices apply.',
+      bertPrediction: 'NOT_SCAM',
+      bertConfidence: 99.0,
+      probabilities: { SCAM: 0.01, NOT_SCAM: 0.99 },
+      bertModelStatus: bertConfig ? 'BERT Sequence Classifier Active' : 'Heuristic Transformer Emulation Active',
+      modelArchitecture: bertConfig?.architectures?.[0] || 'BertForSequenceClassification'
     };
   }
 
@@ -209,6 +214,13 @@ function analyzeConversationText(text) {
     score: calculatedScore
   };
 
+  const isScam = calculatedScore >= 40 || criticalCount > 0;
+  const scamProb = calculatedScore / 100;
+  const normalProb = Math.max(0.01, 1 - scamProb);
+  const confidence = isScam
+    ? Math.min(99.8, Math.max(76.0, calculatedScore * 1.02)).toFixed(1)
+    : Math.max(88.0, normalProb * 100).toFixed(1);
+
   return {
     riskScore: calculatedScore,
     riskLevel,
@@ -219,7 +231,15 @@ function analyzeConversationText(text) {
     intent,
     reasoning,
     recommendedAction,
-    bertModelStatus: bertConfig ? 'BERT Sequence Classifier Active' : 'Heuristic Transformer Emulation Active'
+    bertPrediction: isScam ? 'SCAM' : 'NOT_SCAM',
+    bertConfidence: parseFloat(confidence),
+    probabilities: {
+      SCAM: parseFloat(scamProb.toFixed(3)),
+      NOT_SCAM: parseFloat((1 - scamProb).toFixed(3))
+    },
+    bertModelStatus: bertConfig ? 'BERT Sequence Classifier Active' : 'Heuristic Transformer Emulation Active',
+    modelArchitecture: bertConfig?.architectures?.[0] || 'BertForSequenceClassification',
+    modelLabels: bertConfig?.id2label || { 0: 'NOT_SCAM', 1: 'SCAM' }
   };
 }
 

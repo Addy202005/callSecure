@@ -103,6 +103,11 @@ export function ThreatBanner({
             ]}
           />
         </View>
+        <View style={styles.thresholdMarkerRow}>
+          <Text style={styles.thresholdText}>Safe &lt;40%</Text>
+          <Text style={styles.thresholdText}>Suspicious 40-70%</Text>
+          <Text style={[styles.thresholdText, styles.thresholdDanger]}>Critical Threat &gt;90%</Text>
+        </View>
       </View>
 
       {/* Advisory Box */}
@@ -318,5 +323,18 @@ const styles = StyleSheet.create({
     fontSize: 11,
     lineHeight: 15,
     fontWeight: '500'
+  },
+  thresholdMarkerRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginTop: 4
+  },
+  thresholdText: {
+    color: '#94a3b8',
+    fontSize: 9
+  },
+  thresholdDanger: {
+    color: '#fb7185',
+    fontWeight: '700'
   }
 });

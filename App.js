@@ -1,14 +1,16 @@
 import React, { useState, useEffect, Component } from 'react';
 import { View, StyleSheet, StatusBar, TouchableOpacity, Text } from 'react-native';
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
-import { Users, Phone, ShieldCheck, ShieldAlert, FileText, Lock, AlertTriangle, RefreshCw } from 'lucide-react-native';
+import { Users, Phone, ShieldCheck, ShieldAlert, FileText, Lock, AlertTriangle, RefreshCw, Radio, Sparkles } from 'lucide-react-native';
 
 import { ContactsScreen } from './src/screens/ContactsScreen';
 import { DialpadScreen } from './src/screens/DialpadScreen';
 import { LiveCallScreen } from './src/screens/LiveCallScreen';
 import { SecureVaultScreen } from './src/screens/SecureVaultScreen';
 import { CyberReportingScreen } from './src/screens/CyberReportingScreen';
+import { ScamSimulatorScreen } from './src/screens/ScamSimulatorScreen';
 import { CallConsentModal } from './src/components/CallConsentModal';
+import { IncomingCallModal } from './src/components/IncomingCallModal';
 import { StorageService } from './src/services/storageService';
 
 class ErrorBoundary extends Component {
@@ -50,7 +52,7 @@ class ErrorBoundary extends Component {
 }
 
 function MainApp() {
-  const [activeTab, setActiveTab] = useState('contacts'); // 'contacts' | 'dialpad' | 'vault' | 'reporting'
+  const [activeTab, setActiveTab] = useState('contacts'); // 'contacts' | 'dialpad' | 'simulator' | 'vault' | 'reporting'
   const [isReady, setIsReady] = useState(false);
 
   // Active Call State
@@ -58,6 +60,9 @@ function MainApp() {
 
   // Pre-Call Consent State (Every call requires explicit user consent)
   const [pendingCall, setPendingCall] = useState(null);
+
+  // Incoming Call Simulation State
+  const [incomingCallScenario, setIncomingCallScenario] = useState(null);
 
   // Handoff to Cyber Reporting
   const [reportingRecording, setReportingRecording] = useState(null);
@@ -82,6 +87,7 @@ function MainApp() {
       phoneNumber: contact.phone,
       callType: contact.category === 'suspicious' ? 'Suspect Flagged Contact' : 'Direct Contact Call',
       scenario: undefined,
+      direction: 'outgoing',
       customScript: contact.category === 'suspicious'
         ? 'This is Inspector Chauhan from Cyber Police. You are under Digital Arrest for money laundering.'
         : 'Hello! I am calling to follow up on our previous conversation.'
@@ -94,6 +100,7 @@ function MainApp() {
       phoneNumber,
       callType: 'Direct Dial Line',
       scenario: undefined,
+      direction: 'outgoing',
       customScript: script
     });
   };
@@ -104,8 +111,30 @@ function MainApp() {
       phoneNumber: scenario.callerPhone,
       callType: `Simulation: ${scenario.title}`,
       scenario: scenario,
+      direction: 'outgoing',
       customScript: undefined
     });
+  };
+
+  // Incoming Scam Call Simulation Handlers
+  const handleSimulateIncomingCall = (scenario) => {
+    setIncomingCallScenario(scenario);
+  };
+
+  const handleAnswerIncoming = (scenario) => {
+    setIncomingCallScenario(null);
+    setPendingCall({
+      callerName: scenario.callerName,
+      phoneNumber: scenario.callerPhone,
+      callType: `Simulation: ${scenario.title}`,
+      scenario: scenario,
+      direction: 'incoming',
+      customScript: undefined
+    });
+  };
+
+  const handleDeclineIncoming = () => {
+    setIncomingCallScenario(null);
   };
 
   // Statutory Consent Callbacks
@@ -163,6 +192,7 @@ function MainApp() {
         customScript={activeCall.customScript}
         consentGranted={activeCall.consentGranted}
         consentTimestamp={activeCall.consentTimestamp}
+        direction={activeCall.direction || (activeCall.scenario ? 'incoming' : 'outgoing')}
         onEndCall={handleEndCall}
       />
     );
@@ -182,6 +212,15 @@ function MainApp() {
           <DialpadScreen
             onStartCustomCall={handleStartCustomCall}
             onStartScenarioCall={handleStartScenarioCall}
+          />
+        )}
+
+        {activeTab === 'simulator' && (
+          <ScamSimulatorScreen
+            onStartScenarioCall={handleStartScenarioCall}
+            onSimulateIncomingCall={handleSimulateIncomingCall}
+            onStartCustomCall={handleStartCustomCall}
+            onNavigateToVault={() => setActiveTab('vault')}
           />
         )}
 
@@ -220,6 +259,16 @@ function MainApp() {
         </TouchableOpacity>
 
         <TouchableOpacity
+          style={[styles.tabItem, activeTab === 'simulator' && styles.tabItemActive]}
+          onPress={() => setActiveTab('simulator')}
+        >
+          <Radio size={20} color={activeTab === 'simulator' ? '#f43f5e' : '#64748b'} />
+          <Text style={[styles.tabLabel, activeTab === 'simulator' && (styles.tabLabelActive, { color: '#f43f5e' })]}>
+            Simulator
+          </Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
           style={[styles.tabItem, activeTab === 'vault' && styles.tabItemActive]}
           onPress={() => setActiveTab('vault')}
         >
@@ -239,6 +288,14 @@ function MainApp() {
           </Text>
         </TouchableOpacity>
       </View>
+
+      {/* Realistic Phone Ringing Incoming Scam Simulator Modal */}
+      <IncomingCallModal
+        visible={!!incomingCallScenario}
+        scenario={incomingCallScenario}
+        onAnswer={handleAnswerIncoming}
+        onDecline={handleDeclineIncoming}
+      />
 
       {/* Statutory Call Recording & Real-Time AI Consent Prompt (Every Call Made) */}
       <CallConsentModal

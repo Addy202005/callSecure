@@ -1,34 +1,41 @@
 export const SCAM_SCENARIOS = [
   {
     id: 'digital_arrest_cbi',
-    title: 'Digital Arrest & Money Laundering Scam',
+    title: 'Digital Arrest & Money Laundering Extortion',
     category: 'digital_arrest',
+    categoryLabel: 'Police Impersonation',
     riskExpectation: 'HIGH',
     callerName: 'Inspector Vijay Chauhan (Cyber Cell)',
     callerPhone: '+91 98201 54321',
     callerRole: 'Fake Mumbai Crime Branch Officer',
+    location: 'Mumbai Cyber Crime Cell (Spoofed Line)',
     avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&auto=format&fit=crop&q=80',
-    description: 'Scammer falsely accuses you of a parcel seized with narcotics & bank accounts involved in 3.8 Crore money laundering, threatening immediate arrest under IPC 420/120B via Skype video call.',
+    tactics: ['Digital Arrest Threat', 'Fake Supreme Court Warrant', 'Court Escrow Account', 'Video Isolation'],
+    legalSectionCited: 'IPC Sec 420 / 120B (Fabricated)',
+    counterAdvisory: 'Indian law has NO provision for Digital Arrest. Real police never interrogate or demand bail over phone.',
+    description: 'Scammer falsely accuses you of an intercepted narcotic parcel & 16 fraudulent bank accounts linked to a ₹3.8 Crore money laundering syndicate. Demands 24-hr digital arrest on Skype and transfer of funds to an RBI verification escrow account.',
     dialogueSteps: [
       {
         step: 1,
-        callerText: "Hello, this is Senior Inspector Vijay Chauhan from Mumbai Crime Branch Cyber Cell. Am I speaking to the owner of this number?",
+        callerText: "Hello, this is Senior Inspector Vijay Chauhan from Mumbai Crime Branch Cyber Cell. Am I speaking to the registered subscriber of this number?",
         suggestedUserResponses: [
           "Yes, who is this and why are you calling?",
           "What is this regarding officer?",
           "Yes speaking, please tell me."
         ],
-        riskIncrease: 25
+        riskIncrease: 25,
+        flaggedKeywords: ['Crime Branch', 'Cyber Cell', 'Inspector']
       },
       {
         step: 2,
-        callerText: "Your Aadhaar number has been linked to 16 fraudulent bank accounts used in a 3.8 Crore money laundering syndicate. A non-bailable arrest warrant under IPC Section 420 and Section 120B has been issued by Supreme Court.",
+        callerText: "Your Aadhaar number has been linked to 16 fraudulent bank accounts used in a 3.8 Crore money laundering syndicate. A non-bailable arrest warrant under IPC Section 420 and Section 120B has been signed by the Supreme Court.",
         suggestedUserResponses: [
           "I have not done anything illegal! There must be a mistake.",
           "Can you send me the official notice or FIR copy?",
           "I am innocent, how is my Aadhaar involved?"
         ],
-        riskIncrease: 40
+        riskIncrease: 30,
+        flaggedKeywords: ['Aadhaar', 'money laundering', 'arrest warrant', 'IPC Section 420', 'Supreme Court']
       },
       {
         step: 3,
@@ -38,7 +45,8 @@ export const SCAM_SCENARIOS = [
           "Why do I need to stay on video call?",
           "Please give me your police badge number and station address."
         ],
-        riskIncrease: 25
+        riskIncrease: 25,
+        flaggedKeywords: ['DIGITAL ARREST', 'WhatsApp video call', 'confidential CBI investigation']
       },
       {
         step: 4,
@@ -46,9 +54,10 @@ export const SCAM_SCENARIOS = [
         suggestedUserResponses: [
           "I will never transfer money to any account or share my PIN.",
           "RBI never holds individual escrow accounts for court cases.",
-          "I am reporting this call to 1930 Cyber Helpline."
+          "I am disconnecting and reporting this call to 1930 Cyber Helpline."
         ],
-        riskIncrease: 10
+        riskIncrease: 20,
+        flaggedKeywords: ['asset seizure', 'RBI Secret Verification Escrow', 'UPI PIN', 'transfer immediately']
       }
     ]
   },
@@ -56,12 +65,17 @@ export const SCAM_SCENARIOS = [
     id: 'sbi_kyc_pan_threat',
     title: 'SBI / Bank KYC Expiry & OTP Theft',
     category: 'rbi_kyc',
+    categoryLabel: 'Banking / Phishing',
     riskExpectation: 'HIGH',
-    callerName: 'SBI Verification Manager Rajesh',
+    callerName: 'SBI Verification Desk (Rajesh)',
     callerPhone: '+91 80002 99881',
-    callerRole: 'Impersonating State Bank of India',
+    callerRole: 'Impersonating State Bank of India Manager',
+    location: 'SBI Central Verification Hub',
     avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150&auto=format&fit=crop&q=80',
-    description: 'Scammer warns your SBI debit card and account will be blocked within 30 minutes unless you verify PAN and read out the 6-digit OTP code received.',
+    tactics: ['Urgent Account Freeze', 'RBI Mandate Pressure', 'OTP Solicitation'],
+    legalSectionCited: 'RBI Master Circular on KYC (Misquoted)',
+    counterAdvisory: 'Banks never call from mobile numbers demanding OTPs or threatening 30-minute account closure.',
+    description: 'Scammer warns your SBI debit card and net banking account will be blocked within 30 minutes unless you verify your PAN and read out the 6-digit OTP code received on your phone.',
     dialogueSteps: [
       {
         step: 1,
@@ -71,7 +85,8 @@ export const SCAM_SCENARIOS = [
           "Why are you calling from a mobile number for bank KYC?",
           "Which account number are you referring to?"
         ],
-        riskIncrease: 20
+        riskIncrease: 20,
+        flaggedKeywords: ['State Bank of India', 'KYC document has expired']
       },
       {
         step: 2,
@@ -81,7 +96,8 @@ export const SCAM_SCENARIOS = [
           "Banks never block accounts in 30 minutes without written postal notice.",
           "Is there an official portal to check this?"
         ],
-        riskIncrease: 35
+        riskIncrease: 35,
+        flaggedKeywords: ['RBI mandate', 'frozen within 30 minutes', 'penalty']
       },
       {
         step: 3,
@@ -91,7 +107,8 @@ export const SCAM_SCENARIOS = [
           "The SMS clearly says 'Do not share OTP with bank staff'.",
           "Why do you need OTP for KYC update?"
         ],
-        riskIncrease: 40
+        riskIncrease: 40,
+        flaggedKeywords: ['verification link', 'one-time password', 'OTP']
       }
     ]
   },
@@ -99,12 +116,17 @@ export const SCAM_SCENARIOS = [
     id: 'fedex_customs_narcotics',
     title: 'FedEx Customs Parcel Narcotics Scam',
     category: 'customs_parcel',
+    categoryLabel: 'Customs & Contraband',
     riskExpectation: 'HIGH',
     callerName: 'FedEx Customs Terminal Mumbai',
     callerPhone: '+91 77382 11094',
     callerRole: 'Fake Customs Clearance Officer',
+    location: 'Chhatrapati Shivaji International Cargo Terminal',
     avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&auto=format&fit=crop&q=80',
-    description: 'Claims a parcel sent to Taiwan in your name contains 5 passports, 140g MDMA narcotics, and laptops. Demands urgent clearance fee to avoid NCB raid.',
+    tactics: ['Contraband Accusation', 'NCB Remand Threat', 'Instant UPI Bail Bond'],
+    legalSectionCited: 'NDPS Act (Fabricated FIR)',
+    counterAdvisory: 'Customs and NCB never demand bail or bond payments via UPI or personal bank transfers.',
+    description: 'Claims a parcel sent to Taiwan in your name contains 5 fake passports, 140g MDMA narcotics, and laptops. Demands urgent clearance fee to avoid immediate Narcotics Control Bureau (NCB) raid.',
     dialogueSteps: [
       {
         step: 1,
@@ -114,7 +136,8 @@ export const SCAM_SCENARIOS = [
           "What tracking number is on the parcel?",
           "Are you sure it has my details?"
         ],
-        riskIncrease: 25
+        riskIncrease: 25,
+        flaggedKeywords: ['FedEx', 'intercepted by Customs', 'parcel']
       },
       {
         step: 2,
@@ -124,7 +147,8 @@ export const SCAM_SCENARIOS = [
           "I want to connect directly with the official Mumbai Customs helpline.",
           "I will consult my legal counsel before speaking further."
         ],
-        riskIncrease: 40
+        riskIncrease: 40,
+        flaggedKeywords: ['MDMA contraband', 'Narcotics Control Bureau', 'NCB', 'FIR']
       },
       {
         step: 3,
@@ -134,7 +158,8 @@ export const SCAM_SCENARIOS = [
           "This is an obvious extortion racket.",
           "Disconnecting and alerting the cybercrime authorities."
         ],
-        riskIncrease: 30
+        riskIncrease: 30,
+        flaggedKeywords: ['deposit', 'security bond', 'Quick UPI', 'search warrant']
       }
     ]
   },
@@ -142,12 +167,17 @@ export const SCAM_SCENARIOS = [
     id: 'electricity_bill_urgent',
     title: 'Electricity Bill Immediate Power Cut Scam',
     category: 'electricity_threat',
+    categoryLabel: 'Utility Threat',
     riskExpectation: 'HIGH',
     callerName: 'Electricity Board Power Officer',
     callerPhone: '+91 94110 33490',
     callerRole: 'Fake Power Board Disconnection Desk',
+    location: 'State Electricity Distribution Co.',
     avatar: 'https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=150&auto=format&fit=crop&q=80',
-    description: 'Threatens power cutoff at 9:30 PM due to unpaid bill update, urging you to install QuickSupport/AnyDesk app or pay immediately.',
+    tactics: ['Urgent Disconnection', 'Untrusted APK Download', 'Remote Screen Access Trojan'],
+    legalSectionCited: 'Electricity Act Sec 56 (Misrepresented)',
+    counterAdvisory: 'Electricity boards never demand payment via WhatsApp APK files or AnyDesk screen sharing.',
+    description: 'Threatens power cutoff tonight at 9:30 PM due to unpaid bill update, urging you to install QuickSupport or an APK file link sent on WhatsApp.',
     dialogueSteps: [
       {
         step: 1,
@@ -157,7 +187,8 @@ export const SCAM_SCENARIOS = [
           "What is my consumer CA number?",
           "I have the payment receipt with me."
         ],
-        riskIncrease: 20
+        riskIncrease: 20,
+        flaggedKeywords: ['disconnected tonight at 9:30 PM', 'power grid']
       },
       {
         step: 2,
@@ -167,7 +198,8 @@ export const SCAM_SCENARIOS = [
           "I only use the official government electricity app.",
           "I won't install any remote screen sharing application."
         ],
-        riskIncrease: 45
+        riskIncrease: 45,
+        flaggedKeywords: ['download', 'Power Support APK', 'WhatsApp']
       },
       {
         step: 3,
@@ -176,7 +208,108 @@ export const SCAM_SCENARIOS = [
           "This is a known APK remote-access Trojan scam.",
           "I am blocking this number and contacting my substation directly."
         ],
-        riskIncrease: 30
+        riskIncrease: 30,
+        flaggedKeywords: ['install the APK', 'recharge 10 rupees', 'disconnection team']
+      }
+    ]
+  },
+  {
+    id: 'telegram_wfh_task_scam',
+    title: 'Work-From-Home / YouTube Task Scam',
+    category: 'task_investment',
+    categoryLabel: 'Job & Investment',
+    riskExpectation: 'HIGH',
+    callerName: 'Pooja HR (Global Media Recruitment)',
+    callerPhone: '+91 97120 44821',
+    callerRole: 'Fake Part-Time Job Recruiter',
+    location: 'Telegram Recruitment Agency',
+    avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80',
+    tactics: ['High Return Lure', 'Prepaid Crypto Task', 'Telegram Group Pressure'],
+    legalSectionCited: 'Prize Chits and Money Circulation Schemes Act',
+    counterAdvisory: 'Legitimate employers never ask you to pay or recharge cryptocurrency to receive salary.',
+    description: 'Prompts you to like 3 YouTube videos for ₹150 each, then coerces you into depositing ₹5,000 in a fake crypto trading pool to unlock your ₹18,000 earnings.',
+    dialogueSteps: [
+      {
+        step: 1,
+        callerText: "Hi! I am Pooja from Global Digital HR. We have part-time work from home reviewing YouTube videos. You can earn ₹3,000 to ₹5,000 daily from your phone.",
+        suggestedUserResponses: [
+          "Where did you get my number?",
+          "What company do you represent?",
+          "Can you share the official website and contract?"
+        ],
+        riskIncrease: 20,
+        flaggedKeywords: ['earn ₹3,000 to ₹5,000 daily', 'part-time work from home']
+      },
+      {
+        step: 2,
+        callerText: "We already credited ₹150 for your test task. Now to unlock your VIP Level-2 merchant wallet, you must complete a prepaid cryptocurrency task by depositing ₹5,000 on Telegram.",
+        suggestedUserResponses: [
+          "Why do I have to pay money to get my salary?",
+          "This sounds like a prepaid recharge fraud scheme.",
+          "I will not transfer any funds into an unknown wallet."
+        ],
+        riskIncrease: 45,
+        flaggedKeywords: ['VIP Level-2 merchant wallet', 'prepaid cryptocurrency task', 'depositing ₹5,000']
+      },
+      {
+        step: 3,
+        callerText: "If you don't recharge within 10 minutes, your account will be frozen and you will forfeit all ₹18,000 earnings. Recharges are 100% refundable with 40% commission.",
+        suggestedUserResponses: [
+          "No legitimate job requires upfront investment.",
+          "I am disconnecting and filing a cybercrime report."
+        ],
+        riskIncrease: 30,
+        flaggedKeywords: ['account will be frozen', 'forfeit', '40% commission']
+      }
+    ]
+  },
+  {
+    id: 'kbc_lottery_upi_scam',
+    title: 'KBC / ₹25 Lakh Lottery UPI Cashback Trap',
+    category: 'lottery_fraud',
+    categoryLabel: 'Lottery & Cashback',
+    riskExpectation: 'HIGH',
+    callerName: 'Rana Pratap Singh (KBC Secretary)',
+    callerPhone: '+91 93214 77800',
+    callerRole: 'Fake KBC Head Office Executive',
+    location: 'Mumbai Film City / KBC Desk',
+    avatar: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=150&auto=format&fit=crop&q=80',
+    tactics: ['Greed Lure', 'GST Tax Fee Extortion', 'Fake Government Certificate'],
+    legalSectionCited: 'Lotteries (Regulation) Act',
+    counterAdvisory: 'KBC and lottery prizes never require upfront GST fee transfers via Google Pay or PhonePe.',
+    description: 'Claims your SIM card was selected in a mega lottery draw winning ₹25,00,000 cash. Requires urgent payment of ₹12,500 government tax fee via PhonePe to release funds.',
+    dialogueSteps: [
+      {
+        step: 1,
+        callerText: "Congratulations! I am Rana Pratap Singh from KBC Head Office Mumbai. Your mobile SIM has won ₹25 Lakh in the All-India Mega Lucky Draw!",
+        suggestedUserResponses: [
+          "I never entered any lottery or watched KBC contest.",
+          "How did my number get selected?",
+          "Send the official notification letter."
+        ],
+        riskIncrease: 25,
+        flaggedKeywords: ['won ₹25 Lakh', 'KBC Head Office', 'Mega Lucky Draw']
+      },
+      {
+        step: 2,
+        callerText: "Your winning cheque is ready with State Bank of India. But to disburse the funds, government GST tax of ₹12,500 must be paid right now via PhonePe or Google Pay.",
+        suggestedUserResponses: [
+          "Taxes are deducted at source (TDS), not paid upfront via UPI.",
+          "Why can't you deduct ₹12,500 from the ₹25 Lakh prize money?",
+          "This is a classic advance-fee lottery scam."
+        ],
+        riskIncrease: 40,
+        flaggedKeywords: ['government GST tax', 'PhonePe', 'Google Pay', 'paid right now']
+      },
+      {
+        step: 3,
+        callerText: "If tax is not cleared within 15 minutes, your prize voucher will be cancelled and passed to the next contestant. Scan the QR code sent on your WhatsApp immediately.",
+        suggestedUserResponses: [
+          "I will not pay a single rupee.",
+          "Reporting your number to TRAI and Cyber Cell 1930."
+        ],
+        riskIncrease: 30,
+        flaggedKeywords: ['prize voucher will be cancelled', 'Scan the QR code', 'WhatsApp immediately']
       }
     ]
   },
@@ -184,12 +317,17 @@ export const SCAM_SCENARIOS = [
     id: 'family_doctor_safe',
     title: 'Authentic Call: Dr. Ananya Sharma (Clinic)',
     category: 'safe_personal',
+    categoryLabel: 'Authentic / Medical',
     riskExpectation: 'LOW',
     callerName: 'Dr. Ananya Sharma',
     callerPhone: '+91 98111 22334',
     callerRole: 'Family Physician / Health Clinic',
+    location: 'City Health Clinic, Indiranagar',
     avatar: 'https://images.unsplash.com/photo-1559839734-2b71ea197ec2?w=150&auto=format&fit=crop&q=80',
-    description: 'A genuine routine check-up call from your family doctor discussing annual blood test reports and scheduling a regular appointment.',
+    tactics: ['Routine Medical Follow-up', 'Zero Coercion', 'Legitimate Advice'],
+    legalSectionCited: 'None (Safe Call)',
+    counterAdvisory: 'Normal conversation. No threat detected.',
+    description: 'A genuine routine check-up call from your family doctor discussing annual blood test reports and scheduling a regular appointment. Use this to verify safe call detection.',
     dialogueSteps: [
       {
         step: 1,
@@ -199,7 +337,8 @@ export const SCAM_SCENARIOS = [
           "Hello doctor, how do the results look?",
           "Good afternoon doctor, is everything normal?"
         ],
-        riskIncrease: 0
+        riskIncrease: 0,
+        flaggedKeywords: []
       },
       {
         step: 2,
@@ -209,7 +348,8 @@ export const SCAM_SCENARIOS = [
           "Got the email, thank you so much for the advice.",
           "I will start the supplement as recommended."
         ],
-        riskIncrease: 0
+        riskIncrease: 0,
+        flaggedKeywords: []
       },
       {
         step: 3,
@@ -218,7 +358,8 @@ export const SCAM_SCENARIOS = [
           "Thank you Dr. Ananya, have a wonderful day!",
           "Thanks a lot doctor, take care."
         ],
-        riskIncrease: 0
+        riskIncrease: 0,
+        flaggedKeywords: []
       }
     ]
   }
